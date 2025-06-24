@@ -1,0 +1,17 @@
+objetivos
+
+dibujar un array de una pieza de tetromino
+
+iterar el array por filas y columnas y dibujar el rectangulo segun cada dato este presente(pieza)
+
+
+controlar el tetromino
+utilizar un vector2d para mover el tetromino completo, con todas sus piezas
+
+cons : las piezas tienen que moverse por cada celda, no pueden moverse libremente
+	   las piezas no pueden traspazar los bordes del tablero
+	   las piezas no pueden ir hacia arriba
+	   las piezas tienen que apilarse al llegar al suelo
+	   
+
+
