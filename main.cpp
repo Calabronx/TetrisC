@@ -4,7 +4,6 @@
 int main(int argc, char* argv[])
 {
 	Game *tetris = new Game();
-	tetris->run();
 
 	return 0;
 }

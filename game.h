@@ -10,48 +10,46 @@
 
 #include <vector>
 
-enum GamePhase
-{
-	GAME_PHASE_STARTED,
-	GAME_PHASE_OVER
-};
-
-struct GameState
-{
-	GamePhase phase;
-	Tetromino tetro_player;
-};
-
 class Game {
+
+	enum GamePhase
+	{
+		GAME_PHASE_STARTED,
+		GAME_PHASE_OVER
+	};
+
+	struct GameState
+	{
+		GamePhase 		phase;
+		TetrominoShape 	tetromino; // player tetromino
+		InputState 		input;
+
+		GameState();
+
+	};
+
 	public:
 		Game();
 		~Game();
 	private:
 		void init();
-		void update();
-		void render();
-		int  input();
+		void update(GameState* game);
+		void render(GameState* game);
+		void input_key(GameState* game, InputManager* input, TetrominoShape* tetromino);
 
 		//in game methods
-		void spawn_piece();
-		void draw_piece(SDL_Renderer* renderer, PieceState* piece, int row, int col, unsigned int value, const int width, const int height);
-		void draw_tetromino(SDL_Renderer* renderer, int x, int y, const int width, const int height);
-		bool check_piece_valid(PieceState* piece);
+		void spawn_piece(GameState* game);
+		//bool check_piece_valid(PieceState* piece);
 
 		void render_board(SDL_Renderer *renderer);
-	public:
-		void run();
+		void start_game(GameState* game, InputManager* input, Board *board);
 
 	private:
-		Board			*m_board;
-		InputManager	*m_input;
-		Tetromino		*m_player;
+		// Tetromino		*m_player;
 
 		SDL_Window 		*m_window;
 		SDL_Renderer 	*m_renderer;
 		SDL_Surface 	*m_surface;
-
-
 	};
 
 

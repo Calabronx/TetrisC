@@ -3,9 +3,24 @@
 
 #include <vector>
 
+typedef std::vector<std::vector<unsigned int>>  uint_arr;
+struct Tetromino
+{
+	const uint_arr 		*data;
+	int 				side;
+};
+
 // tetrominos matrices
-typedef std::vector<std::vector<unsigned int>> uint_arr;
-typedef std::vector<std::vector<std::vector<unsigned int>>> uint_arr_tetrominos;
+typedef std::vector<std::vector<std::vector<Tetromino>>> tetrominos_table;
+
+
+inline Tetromino tetromino(const uint_arr* matrix, int side)
+{
+	Tetromino tetro = {};
+	tetro.data = matrix;
+	tetro.side = side;
+	return tetro;
+}
 
 const uint_arr TETROMINO_1 = {
 	{0, 0, 0, 0},
@@ -50,13 +65,13 @@ const uint_arr TETROMINO_7 = {
 };
 
 
-const uint_arr_tetrominos TETROMINOS = {
-	TETROMINO_1,
-	TETROMINO_2,
-	TETROMINO_3,
-	TETROMINO_4,
-	TETROMINO_5,
-	TETROMINO_6,
-	TETROMINO_7
+const std::vector<Tetromino> TETROMINOS = {
+	tetromino(&TETROMINO_1, 4),
+	tetromino(&TETROMINO_2, 2),
+	tetromino(&TETROMINO_3, 3),
+	tetromino(&TETROMINO_4, 3),
+	tetromino(&TETROMINO_5, 3),
+	tetromino(&TETROMINO_6, 3),
+	tetromino(&TETROMINO_7, 3),
 };
 #endif

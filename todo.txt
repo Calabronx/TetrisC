@@ -12,6 +12,10 @@ cons : las piezas tienen que moverse por cada celda, no pueden moverse librement
 	   las piezas no pueden traspazar los bordes del tablero
 	   las piezas no pueden ir hacia arriba
 	   las piezas tienen que apilarse al llegar al suelo
-	   
+
+
+
+input
+
 
 

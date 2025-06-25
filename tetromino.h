@@ -2,37 +2,41 @@
 #define TETROMINO_H
 
 #include <vector>
+#include <SDL2/SDL.h>
 
 #include "data.h"
 #include "util.h"
 
 struct PieceState
 {
-		unsigned int 	tetrino_index;
-		int 			offset_row;
-		int 			offset_col;
-		int 			rotation;
+	unsigned int 			tetrino_index;
+	int 					offset_row;
+	int 					offset_col;
+	int 					rotation;
 };
 
-class Tetromino
+class TetrominoShape
 {
 	public:
-					Tetromino(const uint_arr &matrix, int side);
-					~Tetromino();
-
+																					TetrominoShape(const Tetromino& tetromino);
+																					TetrominoShape();
 	public:
-		unsigned int 	get_tetromino(int row, int col, int rotation);
-		uint_arr 		get_matrix();
-		int 			getSide() const;
-		void			set_position(Vector2 position);
-		Vector2			get_position() const;
-		PieceState*		get_state_of_piece() const;
+		const unsigned int 		get_tetromino(int row, int col, int rotation) const;
+		uint_arr 				get_matrix() const;
+		int 					getSide() const;
+		void					set_position(Vector2 position);
+		Vector2					get_position() const;
+		PieceState				get_state_of_piece() const;
+		void 					set_state_of_piece(PieceState piece_state);
+
+
+		void 						draw_piece(SDL_Renderer* renderer, PieceState* piece, int row, int col, unsigned int value, const int width, const int height);
+		void 						draw_tetromino(SDL_Renderer* renderer, const int width, const int height);
 
 	private:
-		std::vector<std::vector<unsigned int>> 				 m_matrix;
-		int 												 m_side;
-		PieceState*											 m_piece_state;
-		Vector2												 m_position;
+		PieceState							m_piece_state;
+		Vector2								m_position;
+		const Tetromino*					m_tetromino;
 };
 
 #endif

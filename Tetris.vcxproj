@@ -157,6 +157,7 @@
   <ItemGroup>
     <ClInclude Include="board.h" />
     <ClInclude Include="colors.h" />
+    <ClInclude Include="data.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="input.h" />
     <ClInclude Include="tetromino.h" />

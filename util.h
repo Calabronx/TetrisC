@@ -29,6 +29,15 @@ struct Vector2
 	}
 };
 
+struct InputState
+{
+	unsigned int left;
+	unsigned int right;
+	unsigned int down;
+	unsigned int up;
+	unsigned int esc;
+};
+
 enum KeyPressed
 {
 	LEFT 	= 1,
@@ -37,7 +46,6 @@ enum KeyPressed
 	DOWN 	= 4,
 	ESCAPE 	= 5,
 };
-
 
 void fill_rect(SDL_Renderer* renderer, int x, int y, const int width, const int height, Color color);
 

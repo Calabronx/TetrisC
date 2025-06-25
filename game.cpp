@@ -1,5 +1,6 @@
 #include "game.h"
 #include "colors.h"
+#include "data.h"
 
 #include <iostream>
 
@@ -15,6 +16,13 @@ Game::~Game()
 
 void Game::init()
 {
+	GameState game;
+	game.input = {};
+	//game.tetromino = TetrominoShape(TETROMINO_1);
+	Board board = {};
+	InputManager input = {};
+	game.phase = GAME_PHASE_STARTED;
+
 	if (SDL_Init(SDL_INIT_VIDEO) < 0)
 	{
 		std::cout << "Failed to initialize the window\n";
@@ -53,31 +61,56 @@ void Game::init()
 		return;
 	}
 
-	m_board = new Board();
-	m_input = new InputManager();
+	spawn_piece(&game);
 
-	spawn_piece();
+	start_game(&game, &input, &board);
 }
 
-void Game::update()
+void Game::update(GameState* game)
 {
-	render();
+	render(game);
 }
 
-int Game::input()
+void Game::input_key(GameState* game, InputManager* input, TetrominoShape* tetromino)
 {
-	PieceState* piece = m_player->get_state_of_piece();
-	int key = m_input->input_keyboard(piece);
-	// solo para debuggear despues se elimina
-	if (key != 0)
+	InputState input_state = game->input;
+	auto piece = tetromino->get_state_of_piece();
+
+	int key = input->input_keyboard(&input_state, tetromino);
+
+	if (input_state.left > 0)
 	{
-		std:: cout << "key: " <<key << std::endl;
+		std::cout << "move left" << std::endl;
+		piece.offset_col--;
 	}
 
-	return key;
+	if (input_state.right > 0)
+	{
+		std::cout << "move right" << std::endl;
+		piece.offset_col++;
+	}
+
+	if (input_state.down > 0)
+	{
+		std::cout << "move down" << std::endl;
+		piece.offset_row++;
+	}
+
+	if (input_state.esc > 0)
+	{
+		std::cout << "exit" << std::endl;
+		game->phase = GAME_PHASE_OVER;
+	}
+
+	if (input_state.up > 0)
+	{
+		piece.rotation = (piece.rotation + 1) % 4;
+	}
+
+	game->tetromino.set_state_of_piece(piece);
 }
 
-void Game::render_board(SDL_Renderer *renderer)
+void Game::render_board(SDL_Renderer* renderer)
 {
 	SDL_SetRenderDrawColor(renderer, BARELY_BLACK.r, BARELY_BLACK.g, BARELY_BLACK.b, BARELY_BLACK.a);
 	SDL_RenderClear(renderer);
@@ -97,72 +130,43 @@ void Game::render_board(SDL_Renderer *renderer)
 	// SDL_RenderPresent(renderer);
 }
 
-void Game::draw_piece(SDL_Renderer* renderer, PieceState* piece, int row, int col, unsigned int value, const int width, const int height)
-{
-	Color base_color = BASE_COLORS[value];
-	Color light_color = LIGHT_COLORS[value];
-	Color dark_color = DARK_COLORS[value];
-
-	int edge = GRID_SIZE / 8;
-
-	int x = col * GRID_SIZE;
-	int y = row * GRID_SIZE;
-
-	fill_rect(renderer, x, y, width, height, dark_color);
-	fill_rect(renderer, x + edge, y, GRID_SIZE - edge, GRID_SIZE - edge, light_color);
-	fill_rect(renderer, x + edge, y + edge, GRID_SIZE - edge * 2, GRID_SIZE - edge * 2, base_color);
-}
-
-void Game::draw_tetromino(SDL_Renderer* renderer, int x, int y, const int width, const int height)
-{
-	std::vector<std::vector<unsigned int>> tetromino = m_player->get_matrix();
-	int side = m_player->getSide();
-	PieceState* piece = m_player->get_state_of_piece();
-
-	for (int row = 0; row < side; row++)
-	{
-		for (int col = 0; col < side; col++)
-		{
-			unsigned int value = m_player->get_tetromino(row, col, piece->rotation);
-			if (value > 0)
-			{
-				draw_piece(renderer, piece, row + piece->offset_row, col + piece->offset_col, value, width, height);
-			}
-		}
-	}
-}
-
-void Game::render()
+void Game::render(GameState* game)
 {
 	SDL_RenderClear(m_renderer);
-	
+
 	render_board(m_renderer);
-	draw_tetromino(m_renderer, 0, 0, CELL_SIZE, CELL_SIZE);
+
+	game->tetromino.draw_tetromino(m_renderer, CELL_SIZE, CELL_SIZE);
 
 	SDL_SetRenderDrawColor(m_renderer, BLACK.r, BLACK.g, BLACK.b, BLACK.a);
 
 	SDL_RenderPresent(m_renderer);
 }
 
-void Game::spawn_piece()
+void Game::spawn_piece(GameState* game)
 {
-	m_player = new Tetromino(TETROMINO_1, 4);
+	// game
+	//m_player = new Tetromino(TETROMINO_1, 4);
+	game->tetromino = TetrominoShape(TETROMINOS[0]);
 }
 
-void Game::run()
+void Game::start_game(GameState* game, InputManager* input, Board *board)
 {
 	bool exit = false;
 	std::cout << "game started running" << std::endl;
 
-	while(!exit)
+	while (!exit)
 	{
-		update();
-		int key = input();
+		update(game);
+		input_key(game, input, &game->tetromino);
 
-		if (key == ESCAPE)
+		if (game->phase == GAME_PHASE_OVER)
 		{
 			exit = true;
 		}
 	}
 }
 
+Game::GameState::GameState()
+{
+}
