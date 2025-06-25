@@ -12,7 +12,7 @@ lib/
 *.lib
 
 # Carpetas comunes de build
-build/
+x64/
 bin/
 out/
 
@@ -23,5 +23,8 @@ out/
 .DS_Store
 
 # Archivos de VSCode o IDEs
-.vscode/
-.idea/
+.vs/
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
