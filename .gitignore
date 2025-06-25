@@ -1,0 +1,27 @@
+# Ignorar carpetas locales
+include/
+lib/
+
+# Archivos de compilación
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.a
+*.lib
+
+# Carpetas comunes de build
+build/
+bin/
+out/
+
+# Archivos de backup / temporales
+*~
+*.log
+*.tmp
+.DS_Store
+
+# Archivos de VSCode o IDEs
+.vscode/
+.idea/
