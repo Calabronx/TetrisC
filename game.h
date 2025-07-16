@@ -33,20 +33,20 @@ class Game {
 		~Game();
 	private:
 		void init();
-		void update(GameState* game);
-		void render(GameState* game);
-		void input_key(GameState* game, InputManager* input, TetrominoShape* tetromino);
+		void update(GameState* game, Board* board ,InputManager* input);
+		void render(GameState* game, Board* board);
+		void input_management(GameState* game, InputManager* input, Board* board, TetrominoShape* tetromino);
 
 		//in game methods
 		void spawn_piece(GameState* game);
-		//bool check_piece_valid(PieceState* piece);
+		void merge_piece(GameState* game, Board* board);
+		bool soft_drop(GameState* game, Board* board);
+		bool check_piece_valid(GameState* game, PieceState* piece, Board *board, int width, int height);
 
-		void render_board(SDL_Renderer *renderer);
+		void render_board(SDL_Renderer *renderer, Board* board);
 		void start_game(GameState* game, InputManager* input, Board *board);
 
 	private:
-		// Tetromino		*m_player;
-
 		SDL_Window 		*m_window;
 		SDL_Renderer 	*m_renderer;
 		SDL_Surface 	*m_surface;

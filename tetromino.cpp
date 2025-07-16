@@ -1,12 +1,12 @@
 #include "tetromino.h"
 
-TetrominoShape::TetrominoShape(const Tetromino& tetromino)
+TetrominoShape::TetrominoShape(const Tetromino& tetromino) // deberia ver, por que no usar un pointer como originalmente planeaba
 {
 	m_piece_state = {};
 	m_tetromino = &tetromino;
 }
 
-TetrominoShape::TetrominoShape()
+TetrominoShape::TetrominoShape() // como evito este constructor al pedo? se llama y luego se pisa nuevamente
 {
 }
 
@@ -35,7 +35,7 @@ uint_arr TetrominoShape::get_matrix() const
 	return *m_tetromino->data;
 }
 
-int TetrominoShape::getSide() const
+int TetrominoShape::get_side() const
 {
 	return m_tetromino->side;
 }

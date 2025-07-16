@@ -2,6 +2,7 @@
 #include "colors.h"
 #include "data.h"
 
+#include <random>
 #include <iostream>
 
 Game::Game()
@@ -18,10 +19,11 @@ void Game::init()
 {
 	GameState game;
 	game.input = {};
-	//game.tetromino = TetrominoShape(TETROMINO_1);
 	Board board = {};
 	InputManager input = {};
 	game.phase = GAME_PHASE_STARTED;
+
+	srand(time(NULL));
 
 	if (SDL_Init(SDL_INIT_VIDEO) < 0)
 	{
@@ -64,19 +66,21 @@ void Game::init()
 	spawn_piece(&game);
 
 	start_game(&game, &input, &board);
+
 }
 
-void Game::update(GameState* game)
+void Game::update(GameState* game, Board* board, InputManager* input)
 {
-	render(game);
+	input_management(game, input, board, &game->tetromino);
+	render(game, board);
 }
 
-void Game::input_key(GameState* game, InputManager* input, TetrominoShape* tetromino)
+void Game::input_management(GameState* game, InputManager* input, Board* board, TetrominoShape* tetromino)
 {
 	InputState input_state = game->input;
-	auto piece = tetromino->get_state_of_piece();
+	PieceState piece = tetromino->get_state_of_piece();
 
-	int key = input->input_keyboard(&input_state, tetromino);
+	input->input_keyboard(&input_state, tetromino);
 
 	if (input_state.left > 0)
 	{
@@ -90,10 +94,18 @@ void Game::input_key(GameState* game, InputManager* input, TetrominoShape* tetro
 		piece.offset_col++;
 	}
 
-	if (input_state.down > 0)
+	if (input_state.down > 0 && input_state.right == 0 && input_state.left == 0)
 	{
 		std::cout << "move down" << std::endl;
 		piece.offset_row++;
+
+		std::cout << "touch " << piece.offset_row << std::endl;
+		if (!check_piece_valid(game, &piece, board, WIDTH, HEIGHT))
+		{
+			merge_piece(game, board);
+			spawn_piece(game);
+			soft_drop(game, board);
+		}
 	}
 
 	if (input_state.esc > 0)
@@ -107,34 +119,40 @@ void Game::input_key(GameState* game, InputManager* input, TetrominoShape* tetro
 		piece.rotation = (piece.rotation + 1) % 4;
 	}
 
-	game->tetromino.set_state_of_piece(piece);
+	if(check_piece_valid(game, &piece, board, WIDTH, HEIGHT))
+	{
+		game->tetromino.set_state_of_piece(piece);
+	}
 }
 
-void Game::render_board(SDL_Renderer* renderer)
+void Game::render_board(SDL_Renderer* renderer, Board* board)
 {
 	SDL_SetRenderDrawColor(renderer, BARELY_BLACK.r, BARELY_BLACK.g, BARELY_BLACK.b, BARELY_BLACK.a);
 	SDL_RenderClear(renderer);
 
 	SDL_SetRenderDrawColor(renderer, DARK_GREY.r, DARK_GREY.g, DARK_GREY.b, DARK_GREY.a);
 
-	for (int x = 0; x < 1 + WIDTH * CELL_SIZE; x += CELL_SIZE)
-	{
-		SDL_RenderDrawLine(renderer, x, 0, x, SCREEN_HEIGHT);
-	}
+	// for (int x = 0; x < 1 + WIDTH * CELL_SIZE; x += CELL_SIZE)
+	// {
+	// 	SDL_RenderDrawLine(renderer, x, 0, x, SCREEN_HEIGHT);
+	// }
 
-	for (int y = 0; y < HEIGHT * CELL_SIZE; y += CELL_SIZE)
-	{
-		SDL_RenderDrawLine(renderer, 0, y, SCREEN_WIDTH, y);
-	}
+	// for (int y = 0; y < HEIGHT * CELL_SIZE; y += CELL_SIZE)
+	// {
+	// 	SDL_RenderDrawLine(renderer, 0, y, SCREEN_WIDTH, y);
+	// }
 
 	// SDL_RenderPresent(renderer);
+
+	board->draw_board(renderer, WIDTH, HEIGHT);
+
 }
 
-void Game::render(GameState* game)
+void Game::render(GameState* game, Board* board)
 {
 	SDL_RenderClear(m_renderer);
 
-	render_board(m_renderer);
+	render_board(m_renderer, board);
 
 	game->tetromino.draw_tetromino(m_renderer, CELL_SIZE, CELL_SIZE);
 
@@ -146,8 +164,91 @@ void Game::render(GameState* game)
 void Game::spawn_piece(GameState* game)
 {
 	// game
-	//m_player = new Tetromino(TETROMINO_1, 4);
-	game->tetromino = TetrominoShape(TETROMINOS[0]);
+	int index = 1 + rand() % TETROMINOS.size() - 1;
+	game->tetromino = TetrominoShape(TETROMINOS[index]);
+
+	PieceState piece;
+	piece.offset_col = WIDTH / 2;
+	piece.offset_row = 0;
+	piece.rotation = 0;
+	piece.tetromino_index = index;
+	game->tetromino.set_state_of_piece(piece);
+}
+
+void Game::merge_piece(GameState* game, Board* board)
+{
+	const TetrominoShape* tetromino = &game->tetromino;
+	PieceState piece = tetromino->get_state_of_piece();
+	for (int row = 0; row < tetromino->get_side(); row++)
+	{
+		for (int col = 0; col < tetromino->get_side(); col++)
+		{
+			unsigned int value = tetromino->get_tetromino(row, col, piece.rotation);
+
+			if (value > 0)
+			{
+				int border_row = piece.offset_row + row;
+				int border_col = piece.offset_col + col;
+
+				board->set_matrix(WIDTH, border_row, border_col, value);
+
+				board->print_board();
+			}
+		}
+	}
+}
+
+bool Game::soft_drop(GameState* game, Board* board)
+{
+	return false;
+}
+
+bool Game::check_piece_valid(GameState* game, PieceState* piece, Board *board, int width, int height)
+{
+	const TetrominoShape *tetromino = &game->tetromino;
+	int side = tetromino->get_side();
+	for (int row = 0; row < side; row++)
+	{
+		for (int col = 0; col < side; col++)
+		{
+			unsigned int value = tetromino->get_tetromino(row, col, piece->rotation);
+
+			if (value > 0)
+			{
+				int board_row = piece->offset_row + row;
+				int board_col = piece->offset_col + col;
+
+				if (board_row < 0)
+				{
+					return false;
+				}
+
+				if (board_row >= height) // el valor en realidad deberia ser el height, pero es mayor al final del tablero
+				{
+					std::cout << "collision down" << std::endl;
+					return false;
+				}
+
+				if (board_col < 0)
+				{
+					std::cout << "collision left" << std::endl;
+					return false;
+				}
+
+				if (board_col >= width)
+				{
+					return false;
+				}
+
+				if (board->get_matrix(width, board_row, board_col))
+				{
+					return false;
+				}
+			}
+		}
+	}
+
+	return true;
 }
 
 void Game::start_game(GameState* game, InputManager* input, Board *board)
@@ -157,8 +258,7 @@ void Game::start_game(GameState* game, InputManager* input, Board *board)
 
 	while (!exit)
 	{
-		update(game);
-		input_key(game, input, &game->tetromino);
+		update(game, board, input);
 
 		if (game->phase == GAME_PHASE_OVER)
 		{

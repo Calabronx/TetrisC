@@ -9,7 +9,7 @@
 
 struct PieceState
 {
-	unsigned int 			tetrino_index;
+	unsigned int 			tetromino_index;
 	int 					offset_row;
 	int 					offset_col;
 	int 					rotation;
@@ -23,7 +23,7 @@ class TetrominoShape
 	public:
 		const unsigned int 		get_tetromino(int row, int col, int rotation) const;
 		uint_arr 				get_matrix() const;
-		int 					getSide() const;
+		int 					get_side() const;
 		void					set_position(Vector2 position);
 		Vector2					get_position() const;
 		PieceState				get_state_of_piece() const;

@@ -5,7 +5,7 @@
 #include "colors.h"
 
 const int WIDTH = 10;
-const int HEIGHT = 32;
+const int HEIGHT = 22;
 const int GRID_SIZE = 30;
 const int CELL_SIZE = 30;
 const int SCREEN_WIDTH = 300;
