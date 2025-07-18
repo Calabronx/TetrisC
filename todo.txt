@@ -8,3 +8,5 @@ objetivos
 
 mergera pieza al tablero cuando toque el suelo
 
+
+manejar tiempo en el juego, agregar un atributo int a el game state y usarlo para manejar el tiempo de SDL

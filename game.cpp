@@ -21,7 +21,12 @@ void Game::init()
 	game.input = {};
 	Board board = {};
 	InputManager input = {};
-	game.phase = GAME_PHASE_STARTED;
+	game.phase = GAME_PHASE_PLAY;
+
+	for ( int i = 0; i < HEIGHT ;i++)
+	{
+		game.lines.push_back(0);
+	}
 
 	srand(time(NULL));
 
@@ -75,6 +80,16 @@ void Game::update(GameState* game, Board* board, InputManager* input)
 	render(game, board);
 }
 
+void Game::update_game_line(GameState* game, Board* board)
+{
+	if (game->time >= game->highlight_end_time)
+	{
+		check_lines_to_clear(game, board, &game->lines);
+		game->line_count += game->pending_line_count;
+		game->phase = GAME_PHASE_PLAY;
+	}
+}
+
 void Game::input_management(GameState* game, InputManager* input, Board* board, TetrominoShape* tetromino)
 {
 	InputState input_state = game->input;
@@ -94,7 +109,7 @@ void Game::input_management(GameState* game, InputManager* input, Board* board, 
 		piece.offset_col++;
 	}
 
-	if (input_state.down > 0 && input_state.right == 0 && input_state.left == 0)
+	if (input_state.down > 0)
 	{
 		std::cout << "move down" << std::endl;
 		piece.offset_row++;
@@ -102,10 +117,13 @@ void Game::input_management(GameState* game, InputManager* input, Board* board, 
 		std::cout << "touch " << piece.offset_row << std::endl;
 		if (!check_piece_valid(game, &piece, board, WIDTH, HEIGHT))
 		{
-			merge_piece(game, board);
-			spawn_piece(game);
-			soft_drop(game, board);
+			soft_drop(game, board, &piece);
 		}
+	}
+
+	if(game->time - game->last_time >= DROP_TIME)
+	{
+		soft_drop(game, board, &piece);
 	}
 
 	if (input_state.esc > 0)
@@ -122,6 +140,13 @@ void Game::input_management(GameState* game, InputManager* input, Board* board, 
 	if(check_piece_valid(game, &piece, board, WIDTH, HEIGHT))
 	{
 		game->tetromino.set_state_of_piece(piece);
+	}
+
+	game->pending_line_count = find_lines(board, WIDTH, HEIGHT, &game->lines);
+	if (game->pending_line_count > 0)
+	{
+		game->phase = GAME_PHASE_LINE;
+		game->highlight_end_time = game->time + 0.5f;
 	}
 }
 
@@ -198,9 +223,22 @@ void Game::merge_piece(GameState* game, Board* board)
 	}
 }
 
-bool Game::soft_drop(GameState* game, Board* board)
+bool Game::soft_drop(GameState* game, Board* board, PieceState* piece)
 {
-	return false;
+	game->last_time = game->time;
+	++piece->offset_row;
+
+	if (!check_piece_valid(game, piece, board, WIDTH, HEIGHT))
+	{
+			merge_piece(game, board);
+			spawn_piece(game);
+			std::cout << "soft_drop() mergeo pieza" << std::endl;
+
+			return false;
+		
+	}
+
+	return true;
 }
 
 bool Game::check_piece_valid(GameState* game, PieceState* piece, Board *board, int width, int height)
@@ -220,18 +258,17 @@ bool Game::check_piece_valid(GameState* game, PieceState* piece, Board *board, i
 
 				if (board_row < 0)
 				{
+					std::cout << "collision left" << std::endl;
 					return false;
 				}
 
 				if (board_row >= height) // el valor en realidad deberia ser el height, pero es mayor al final del tablero
 				{
-					std::cout << "collision down" << std::endl;
 					return false;
 				}
 
 				if (board_col < 0)
 				{
-					std::cout << "collision left" << std::endl;
 					return false;
 				}
 
@@ -251,6 +288,46 @@ bool Game::check_piece_valid(GameState* game, PieceState* piece, Board *board, i
 	return true;
 }
 
+void Game::check_lines_to_clear(GameState* game, Board* board, const std::vector<unsigned int>* lines)
+{
+	int src_row = HEIGHT - 1;
+	for (int dst_row = src_row; dst_row >= 0; --dst_row)
+	{
+		while (src_row > 0 && (*lines)[src_row])
+		{
+			--src_row;
+		}
+
+		src_row = board->clear_lines(src_row, dst_row);
+	}
+}
+
+int Game::get_row_filled(Board* board, int width, int row)
+{
+	for (int col = 0; col < width; ++col)
+	{
+		if(!board->get_matrix(width, row, col))
+		{
+			return 0;
+		}
+	}
+	return 1;
+}
+
+int Game::find_lines(Board *board, int width, int height, std::vector<unsigned int>* lines_out)
+{
+	int count = 0;
+	for (int row = 0; row < height; row++)
+	{
+		unsigned int filled = get_row_filled(board, width, row);
+
+		(*lines_out)[row] = filled;
+		count += filled;
+	}
+
+	return count;
+}
+
 void Game::start_game(GameState* game, InputManager* input, Board *board)
 {
 	bool exit = false;
@@ -258,7 +335,17 @@ void Game::start_game(GameState* game, InputManager* input, Board *board)
 
 	while (!exit)
 	{
-		update(game, board, input);
+		game->time = SDL_GetTicks() / 1000.0f;
+
+		switch(game->phase)
+		{
+			case GAME_PHASE_PLAY:
+				update(game, board, input);
+				break;
+			case GAME_PHASE_LINE:
+				update_game_line(game, board);
+				break;
+		}
 
 		if (game->phase == GAME_PHASE_OVER)
 		{

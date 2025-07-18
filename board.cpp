@@ -1,6 +1,7 @@
 #include "board.h"
 #include "util.h"
 
+#include <cstring>
 #include <iostream>
 
 Board::Board()
@@ -76,4 +77,18 @@ void Board::draw_board(SDL_Renderer* renderer, const int width, const int height
 			
 		}
 	}
+}
+
+int Board::clear_lines(int src_row, int dst_row)
+{
+	if (src_row < 0)
+	{
+		m_matrix[dst_row] = std::vector<unsigned int>(WIDTH, 0);
+		
+	} else
+	{
+		m_matrix[dst_row] = m_matrix[src_row];
+		--src_row;
+	}
+	return src_row;
 }

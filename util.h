@@ -10,6 +10,7 @@ const int GRID_SIZE = 30;
 const int CELL_SIZE = 30;
 const int SCREEN_WIDTH = 300;
 const int SCREEN_HEIGHT = 720;
+const int DROP_TIME = 1;
 
 struct Vector2
 {
