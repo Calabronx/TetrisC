@@ -5,6 +5,8 @@
 #include <random>
 #include <iostream>
 
+
+bool is_merged = false;
 Game::Game()
 {
 	init();
@@ -117,12 +119,14 @@ void Game::input_management(GameState* game, InputManager* input, Board* board, 
 		std::cout << "touch " << piece.offset_row << std::endl;
 		if (!check_piece_valid(game, &piece, board, WIDTH, HEIGHT))
 		{
+			piece = tetromino->get_state_of_piece();
 			soft_drop(game, board, &piece);
 		}
 	}
 
 	if(game->time - game->last_time >= DROP_TIME)
 	{
+		piece = tetromino->get_state_of_piece();
 		soft_drop(game, board, &piece);
 	}
 
@@ -218,6 +222,7 @@ void Game::merge_piece(GameState* game, Board* board)
 				board->set_matrix(WIDTH, border_row, border_col, value);
 
 				board->print_board();
+				is_merged = false;
 			}
 		}
 	}
