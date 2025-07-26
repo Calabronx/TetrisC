@@ -37,6 +37,7 @@ struct InputState
 	unsigned int down;
 	unsigned int up;
 	unsigned int esc;
+	unsigned int back;
 };
 
 enum KeyPressed
@@ -46,6 +47,7 @@ enum KeyPressed
 	UP		= 3,
 	DOWN 	= 4,
 	ESCAPE 	= 5,
+	BACKSPACE = 6
 };
 
 void fill_rect(SDL_Renderer* renderer, int x, int y, const int width, const int height, Color color);

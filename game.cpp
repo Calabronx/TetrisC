@@ -78,7 +78,7 @@ void Game::init()
 
 void Game::update(GameState* game, Board* board, InputManager* input)
 {
-	input_management(game, input, board, &game->tetromino);
+	input_game(game, input, board, &game->tetromino);
 	render(game, board);
 }
 
@@ -92,7 +92,7 @@ void Game::update_game_line(GameState* game, Board* board)
 	}
 }
 
-void Game::input_management(GameState* game, InputManager* input, Board* board, TetrominoShape* tetromino)
+void Game::input_game(GameState* game, InputManager* input, Board* board, TetrominoShape* tetromino)
 {
 	InputState input_state = game->input;
 	PieceState piece = tetromino->get_state_of_piece();
@@ -143,6 +143,12 @@ void Game::input_management(GameState* game, InputManager* input, Board* board, 
 
 	if(check_piece_valid(game, &piece, board, WIDTH, HEIGHT))
 	{
+		game->tetromino.set_state_of_piece(piece);
+	}
+
+	if (input_state.back > 0)
+	{
+		while(soft_drop(game, board, &piece));
 		game->tetromino.set_state_of_piece(piece);
 	}
 

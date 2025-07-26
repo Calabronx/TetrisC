@@ -48,35 +48,12 @@ int InputManager::input_keyboard(InputState* input, TetrominoShape* tetromino)
 					key = ESCAPE;
 				}
 
-
-				// if (input.left > 0)
-				// {
-				// 	std::cout << "move left" << std::endl;
-				// 	piece->offset_col--;
-				// }
-
-				// if (input.right > 0)
-				// {
-				// 	std::cout << "move right" << std::endl;
-				// 	piece->offset_col++;
-				// }
-
-				// if (input.down > 0)
-				// {
-				// 	std::cout << "move down" << std::endl;
-				// 	piece->offset_row++;
-				// }
-
-				// if (input.esc > 0)
-				// {
-				// 	std::cout << "exit" << std::endl;
-				// }
-
-				// if (input.up > 0)
-				// {
-				// 	piece->rotation = (piece->rotation + 1) % 4;
-				// }
-
+				if (m_key_map[SDLK_SPACE])
+				{
+					input->back++;
+					key = BACKSPACE;
+					std::cout << "BACKSPACE" << std::endl;
+				}
 				break;
 
 			case SDL_KEYUP:

@@ -45,7 +45,7 @@ class Game {
 		void update(GameState* game, Board* board ,InputManager* input);
 		void update_game_line(GameState* game, Board* board);
 		void render(GameState* game, Board* board);
-		void input_management(GameState* game, InputManager* input, Board* board, TetrominoShape* tetromino);
+		void input_game(GameState* game, InputManager* input, Board* board, TetrominoShape* tetromino);
 
 		//in game methods
 		void spawn_piece(GameState* game);
